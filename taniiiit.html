@@ -1,0 +1,626 @@
+<html lang="fr"><head>
+    <meta charset="UTF-8">
+    <title>Facture - Aperçu &amp; Génération PDF</title>
+    <style>
+        :root {
+          --primary-color: #2c3e50;
+          --secondary-color: #3498db;
+          --accent-color: #28a745;
+          --background: #f8f9fa;
+          --text-color: #2c3e50;
+          --success-color: #28a745;
+          --border-radius: 8px;
+          --box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        body {
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+          background: var(--background);
+          color: var(--text-color);
+          line-height: 1.6;
+          margin: 0;
+          padding: 2rem;
+        }
+        
+        .container {
+          background: white;
+          border-radius: var(--border-radius);
+          box-shadow: var(--box-shadow);
+          padding: 2.5rem;
+          margin: 2rem auto;
+          max-width: 1000px;
+          position: relative;
+          overflow: hidden;
+        }
+        
+        h1, h2 {
+          color: var(--primary-color);
+          margin-bottom: 1.5rem;
+        }
+        
+        h1 {
+          font-size: 2.2rem;
+          font-weight: 700;
+          border-bottom: 2px solid var(--secondary-color);
+          padding-bottom: 0.5rem;
+        }
+        
+        .form-section {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 2.5rem;
+        }
+        
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        
+        label {
+          font-weight: 600;
+          color: var(--primary-color);
+          font-size: 0.9rem;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        
+        input {
+          padding: 0.8rem 1rem;
+          border: 2px solid #e0e0e0;
+          border-radius: var(--border-radius);
+          transition: all 0.3s ease;
+          font-size: 1rem;
+          background: #fff;
+        }
+        
+        input:focus {
+          border-color: var(--secondary-color);
+          box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+          outline: none;
+        }
+        
+        .button-group {
+          display: flex;
+          gap: 1rem;
+          flex-wrap: wrap;
+          margin-top: 2rem;
+        }
+        
+        button {
+          background: var(--secondary-color);
+          color: white;
+          padding: 0.8rem 2rem;
+          border-radius: var(--border-radius);
+          font-weight: 600;
+          transition: all 0.3s ease;
+          border: none;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        
+        button:hover {
+          background: #2185d0;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+        }
+        
+        #apercuFacture {
+          margin-top: 3rem;
+          padding: 2rem;
+          background: #fff;
+          border-radius: var(--border-radius);
+          box-shadow: var(--box-shadow);
+        }
+        
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 2rem 0;
+          background: white;
+          border-radius: var(--border-radius);
+          overflow: hidden;
+          box-shadow: var(--box-shadow);
+        }
+        
+        th, td {
+          padding: 1.2rem;
+          text-align: left;
+          border-bottom: 1px solid #f0f0f0;
+        }
+        
+        th {
+          background: var(--primary-color);
+          color: white;
+          font-weight: 600;
+          text-transform: uppercase;
+          font-size: 0.85rem;
+          letter-spacing: 0.5px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #f8f9fa;
+        }
+        
+        tr:last-child td {
+          border-bottom: none;
+        }
+        
+        .centered {
+          text-align: center;
+        }
+        
+        .footer-info {
+          margin-top: 3rem;
+          text-align: center;
+          padding: 1.5rem;
+          background: #f8f9fa;
+          border-radius: var(--border-radius);
+        }
+        
+        .footer-info p {
+          margin: 0.5rem 0;
+          color: #666;
+        }
+        
+        .footer-info p:nth-child(3) {
+          color: var(--accent-color);
+          font-weight: 500;
+        }
+        
+        .logo-placeholder {
+          width: 150px;
+          height: 60px;
+          background: #f0f0f0;
+          margin-bottom: 1.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: var(--border-radius);
+          color: #666;
+          font-size: 0.9rem;
+          border: 2px dashed #ddd;
+        }
+        
+        .total-row {
+          font-weight: 600;
+          background-color: #f8f9fa !important;
+        }
+        
+        @media (max-width: 768px) {
+          .container {
+            padding: 1.5rem;
+            margin: 1rem;
+          }
+          
+          .form-section {
+            grid-template-columns: 1fr;
+          }
+          
+          button {
+            width: 100%;
+            justify-content: center;
+          }
+          
+          table {
+            display: block;
+            overflow-x: auto;
+          }
+        }
+        
+        /* Login page enhancements */
+        .login-container {
+          background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+        }
+        
+        .login-box {
+          background: white;
+          padding: 2.5rem;
+          border-radius: 16px;
+          box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        
+        .login-box h2 {
+          color: var(--primary-color);
+          margin-bottom: 2rem;
+          font-size: 1.8rem;
+          text-align: center;
+        }
+        
+        .login-form input {
+          width: 100%;
+          padding: 0.8rem 1rem;
+          margin-bottom: 1.5rem;
+          border: 2px solid #e0e0e0;
+          border-radius: var(--border-radius);
+          font-size: 1rem;
+          transition: all 0.3s ease;
+        }
+        
+        .login-form input:focus {
+          border-color: var(--secondary-color);
+          box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .login-form button {
+          background: var(--success-color);
+          width: 100%;
+          padding: 1rem;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+        }
+        
+        .login-form button:hover {
+          background: #218838;
+          transform: translateY(-2px);
+        }
+        
+        .error-message {
+          color: #dc3545;
+          margin-top: 1rem;
+          display: none;
+          font-weight: 500;
+          text-align: center;
+        }
+        </style>
+  </head>
+  <body>
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+          <h2>Connexion</h2>
+          <form class="login-form" onsubmit="return checkCredentials(event)">
+
+
+            <input type="text" id="loginEmail" placeholder="Nom d'utilisateur" required>
+
+            <input type="password" id="loginPassword" placeholder="Mot de passe" required>
+            <button type="submit">Se connecter</button>
+            <div class="error-message" id="errorMessage">Identifiants incorrects</div>
+          </form>
+        </div>
+      </div>
+      
+  <div class="container">
+    <h1>Création de Facture</h1>
+    
+    <!-- Formulaire de saisie -->
+    <div class="form-section">
+      <label>Facture :</label>
+      <input type="text" id="factureNum" placeholder="Ex: 001/2024">
+  
+      <label>Référence :</label>
+      <input type="text" id="reference" placeholder="Ex: 01">
+      
+      <label>Date de début :</label>
+      <input type="date" id="dateDebut">
+      
+      <label>Date de fin :</label>
+      <input type="date" id="dateFin">
+  
+      <label>Nom et adresse du client :</label>
+      <input type="text" id="client" placeholder="Ex: Sahel Port Tanit Lot N° 59">
+  
+      <label>N° Compteur :</label>
+      <input type="number" id="compteur" placeholder="Ex: 4064">
+  
+      <label>Ancien index :</label>
+      <input type="number" id="ancienIndex" placeholder="Ex: 00000">
+  
+      <label>Nouvel index :</label>
+      <input type="number" step="any" id="nouvelIndex" placeholder="Ex: 2259.6">
+  
+      <label>Prix unitaire :</label>
+      <input type="number" step="any" id="prixUnitaire" placeholder="Ex: 350">
+    </div>
+    
+    <button onclick="afficherApercu()">Aperçu de la facture</button>
+    <button onclick="genererPDF()">Télécharger le PDF</button>
+  
+    <!-- Aperçu de la facture -->
+    <div id="apercuFacture">
+      <!-- Logo à gauche (aperçu) -->
+      <div style="float:left;width:120px;height:50px;background:#ccc;margin-bottom:10px;">
+        (Logo à gauche)
+      </div>
+      <div style="clear: both;"></div>
+  
+      <h2 id="afFacture">Facture: ...</h2>
+      <p id="afReference">Référence: ...</p>
+      <p id="afClient">Nom et adresse du Client: ...</p>
+      
+      <!-- Un seul tableau avec les données ET les totaux en bas à droite -->
+      <table>
+        <thead>
+          <tr>
+            <th>Consommation</th>
+            <th>N° Compteur</th>
+            <th>Ancien Index</th>
+            <th>Nouvel Index</th>
+            <th colspan="2" class="centered">Consommation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Consommation De l'eau Relevé</td>
+            <td id="afCompteur"></td>
+            <td id="afAncien"></td>
+            <td id="afNouveau"></td>
+            <td id="afConso" colspan="2" class="centered"></td>
+          </tr>
+          <!-- Facturation Consommation -->
+          <tr>
+            <th>Facturation Consommation</th>
+            <th>Consommation</th>
+            <th>Prix Unitaire</th>
+            <th>Montants Bruts</th>
+            <th>Montants de taxes</th>
+            <th>Montants TTC</th>
+          </tr>
+          <tr>
+            <td>Consommation De l'eau</td>
+            <td id="afConso2" class="centered"></td>
+            <td id="afPrixUnitaire"></td>
+            <td id="afMontantBrut"></td>
+            <td id="afTaxes"></td>
+            <td id="afMontantTTC"></td>
+          </tr>
+  
+          <!-- Totaux en bas à droite, sans lignes supplémentaires avant -->
+          <tr>
+            <td colspan="4"></td>
+            <td><strong>Total Facture</strong></td>
+            <td id="afTotalFacture"></td>
+          </tr>
+          <tr>
+            <td colspan="4"></td>
+            <td><strong>ARIERES</strong></td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <td colspan="4"></td>
+            <td><strong>TOTAL A PAYER</strong></td>
+            <td id="afTotalPayer"></td>
+          </tr>
+        </tbody>
+      </table>
+  
+      <div class="footer-info">
+        <p>Adresse: Ksar N°: 1631 - B.P.: 1234 Nouakchott, Mauritanie</p>
+        <p>Tel/Fax: +222 45 29 86 16 - NIF: 28001735</p>
+        <p>E-mail: msovid@yahoo.fr - www.lesproducticeloo.mr</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- jsPDF et AutoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+  
+  <script>
+function checkCredentials(event) {
+  event.preventDefault();
+  const email = document.getElementById('loginEmail').value.toLowerCase().trim();
+  const password = document.getElementById('loginPassword').value.trim();
+  const errorMessage = document.getElementById('errorMessage');
+
+  // Vérifiez à la fois l'email et le mot de passe
+  if (email === 'mgs@gmail.com' && password === 'mgs') {
+    document.getElementById('loginContainer').style.display = 'none';
+    document.querySelector('.container').style.display = 'block';
+    errorMessage.style.display = 'none';
+  } else {
+    errorMessage.style.display = 'block';
+  }
+  return false;
+}
+
+// Masquer le container principal au chargement
+document.querySelector('.container').style.display = 'none';
+
+
+  var logoBase64 = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAkACQAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAEeAtADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9U6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKYzhQSTgCvIPHX7RGm+HrqXT9Ij/te/QlXdSBDGw7E9z9PzrlxGKo4WPNWlYyqVYU1eTPYqK+X2+NnjfU33xX8Nkp6RwW0bY/77BNWrP41eM9PbdcXEN+gPKS26J+qgV439vYW+0rd7K35nNHGU5bJn0tRXmPgf446X4ouEsrxTpeotwscjDZIfRW9fY4r0pXJH3smvao4iliI89KV0dUKkaivFklFFFdJoFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRTWbbQB4Z+0h8SLvRbe38MaMX/tXUuHMIy6xk4wPQtzz2ANfMMXxK+G/gfUPsviTxJNdXinEtvolv9p8ps8h5Mhc5/u5q7+3F8Q7jwfrWp2drK0Wu64TEkoPz21ggCkL6GRt4yP4Vb1r4bz+dfJVsOsTXlWr6rovT/M+UxdZ+2betuh+t3w08N+Bfij4Ti13wjrct9ZMxjLsBujcAEo64ypGRx71T8aeBZ/DS5lAeFuFmTofr6GvIv8AgmHa3v8AwjPji4LMNPa8t40DZK+YIyWx77WTP4V9n69osGu6TPZzrlZFIHsfWumtlNCtRvTjaR7dKKrUVK1mfF/iGDyiWU4YdCD0NeyfBH4xXOtWL6VqUpnvrFQd7EbpocgZ92UnB9Qa8X8XtJpt9c2s42TQuY2B4OQcVU+Et1JH8StJ8onM0piYL/dZSD+HU/gK/P3XxGHclQlyy/qx5NGu8PioxWzaT+Z93W15HdQpLG25GGQalVt1cb4F1AkzWjH5QN6D09a7Ja/Q8hzWOc4Cni0rN7rs1ufW1qfspuI6iiivoTAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKjkO3mpKay7qAPyJ/bW8STeIv2j/FgkYmOxljsos/wqiD+pb868r8C+C9R+InjDSfDekp5moajMII85wuQSzHHYKCfwr0/wDbO0CXQf2kvGKSqQt1Ol5GT3V0Bz+ea7P/AIJ1afbXn7QTTTqry22k3EsO7sxKKSPcKx/OvFa5qrT7nxrgquKcJdWfoT8EfhLpXwX+H1h4Z0sFxCTLcXDj5p52xvkP1I4HYACu+Kgr0qnealb6dGXuJAgPT3rNXxtprHbmQD1K8UYnN8uwE1SxNeMZdmz7WnQny2hHRHBfFz4D2vxBl+32Fyum6rjDOykxy/7wHOfeuT8A/Ac/DS4l1rWL6C9v1RoraK3B2IW43EkDJx7d69lvPG2nxKfL8yV+wUYrj9V1abVpvMlPyj7sY6CvzDibiDJ8LRlLByU60tFbZefquhpQyqNSvGvUjaxe8G5/txMdNjZr0VK4vwLp58ya7I+XGxD6+prtFr6HgDDVMPksZVPtycl6O3+R046SlWaXQdRRRX6QeeFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRWXDq8U1jc3h3RwwyTI7N28t2Rj/wCOE0CbtualJXklv8ZNRmt7+8/4RuRbSCzh1KMfak8yS0dmHmYxgEBSduc1jftLftTaD+zH4N0XxHrelajq9nqlz9nij04pvB8suCd7AYwPWnYxp1oVfgf9bHutFfn9/wAPivhx/wBCT4o/O3/+OUf8Pivhx/0JPij87f8A+OUjosfoDRX5/f8AD4r4cf8AQk+KPzt//jlbngn/AIKyfDnxt4y0Pw8vhfxDpr6pexWS3d0YPKiaRwis+JM7ckZxQI+5aKZD9z/Gn0AFFFeBftUfteeGP2UbXQZvEGm6hq82tSSrb2+m+XvVYwu5m3sOMuo/GgD32ivz+/4fFfDj/oSfFH52/wD8co/4fFfDj/oSfFH52/8A8coHY/QGivz+/wCHxXw4/wChJ8Ufnb//AByr2g/8FdPh7r+vabpcPgzxNHLfXMdsjyG32qzsFBOJM4yaAPvOimQsWjUkYOKczBRknAoELRUFxfW9rbvPNPHDDGCzySMFVQOpJPSvnf4lft/fBL4ZXUtte+ModWu4yQ1rokZu2z6bl+Ufi1AH0fRX59eI/wDgsR8PrOR10TwV4i1NR0e7eG2Dfk0n61xt1/wWWUSf6N8M22Z/5bapz+kdA7H6b0V+Yi/8Fl5tw3fDOPb326oc/wDout7Sf+CyXhySQDVPhzqkCd2tL+OQ/kyr/OgLHoP/AAUX+B9x4i0ey+IOk25muNMj+z6jHGMsYC2Ukx3CknPs2e1fG37PvxSPwb+LeheKGDPZwSNFdxp1aB1Kv+Wd31UV9s+Ev+CoHwJ8fxmw1abVPD32hTFJHrVgDCwI5BaNnGO3OK8p+Ln7GFh46tZPGnwS1bT/ABHol0TK2l290rlGPJETZxjn7rEEevavPrUZc3PE8HGYWamq9Hc+zdS1y28SG11SxuVvNOu4UmtpozlGRhnINUv1Ffnx8Ofi98Uf2b5m0PVdBvZtFWQsdL1O3kRY2zy0UmPlzj3B9O9fTnw9/am0n4gGOC08CeM3vGwDHp9lHcxKf+ujOgA+or+f+IeDczxOPq4rCLnU3fVpNeWv4H1mCzeg6ahU91+h7VWho+iz6tOFjG2IfekPQU641Dw54P8AC/8AwkHjC7i8M2a8uurXUUYjz0ViCVLewJrwbxt/wVA+BngdmtNNutV8Syx8D+x7EeXn/flZAfwzXXkvh1iJVY1c0fLFfZTu35drfid1XMI2apbn1/Y2Uen26QxDCqMCrS1+cOr/APBZTw+kjDTPhvqcyfwvd6hHGf8AvlVb+dYR/wCCy0+44+Gke3tnVDn/ANF1+/0qUKMI06aslseI7t3Z+nlFfmXZf8FloQ3+mfDOQrn/AJYaoP6x13Hhn/gsB8NNSkRNb8KeJNF3dZLcQ3SL7/fU4+grYVj78orxz4P/ALWPwt+OTLB4U8WWlzqDDP8AZ1yTBc9M4Eb4LfhmvYFkVuAcmgQ+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACuWsbZ73wrq1ug+ea41CNc+pnlArqa5bT7w6f4X1W5A3NDc38oB77biU/0pdUZz21PDU8STQ2l7pf9h6x/aU3hq30VYfsEmPtKGQN8+Nu0bgd2cYrw3/grfbtafAPwBCx+ePVQjfUW7A19OvoOuf8K+/4S0eL9X/tZrAal5G5Da5Kb9nl7fu9uua+Yv8Agrhcm8+AvgGYjaZdW3kembdjWsjzsFFwk+btdem5+UNFFFZnsBT7e5ks7mKeNikkTB1ZTggg5zTKMZoEf0R/s5/EhPi58D/Bni1XEkmpadG85H/PZfklH4OjV6RX5+f8Eh/imdc+FPiTwPNNun0G9F1BGe0M4JOPYOrf99V+gQ6UEiO23HGa/F3/AIKpfEz/AITT9paTRIZt9r4Zso7IKOgmf95J+PzID/u1+yXiPWrfw5oWoardtstbG3kuZWJxhEUsx/IGv5zPid4yuPiJ8RvE3ia7cvPq2oz3jFv9uRmA+gBH5UDRzNFFFBQV0nw1/wCSjeFf+wra/wDo1a5uuk+Gv/JRvCv/AGFbX/0atAmf0ip9wfSuR+KXxO0T4R+A9X8WeIZ/s2labCZZCPvOf4UUd2Y4AHqa65f9WPpX5if8FgPi1Otz4R+HFpMVgaM6xfIp+/y0cIPqBiQ/XFAj5R/aa/bQ8d/tJa1dR3d/No/hTefsuhWchWIL2MpHMjY5OeOeAK+fjk4yc0tFAwore8F/D/xN8R9WXTPC+hX2u35Gfs9jA0rKPU4HA9zXu+kf8E5/j9rFusyeCHtQwztvL2CJvyL5FAz5qor6W1n/AIJzfH7RbNriTwQblVGSlnfQTP8Akr14F4s8Ga94D1iXSvEej3uiajH962voGif6gHqPcUAYvNeo/s9/tDeK/wBnTxzaa94dvpRbeYovdNZz5F5HnlXXpnHRuo615fTWzt4oEf0ffDPxtpXxX8A6H4r0k+bpurWyXUO4crkcqfQg5B9xUHxX+I2kfB/4c694u1k7NO0m1ad1XALkDCoPdmIH418nf8EjfHM3iD9nnWNBuJNz6DrUiQg/wwyxpIo/7782qX/BXbxtNovwL8P+HoJNn9tawrTKD96OFC2PpvaM/wDAaVlvYmyPzT+PX7QXi79obxpda94n1CWVC5+yaerEQWkeeERenTGT1J615ntpaKPJlhRXffC74C/ED40TzR+C/C2oa8sLbZZ4I8Qxk9mdiFB9s5r2S3/4Jo/tBTxK/wDwh8C57NqlsD+W+mB8u0V7/wCOP2Dfjl8P9Ln1HUvAt1NZwIZJZNPmjudijqSEYn8ga8AKsvDAhvQ/5+lAE+n6hdaTfQXtlcSWl3A4kinhco6MDkEEdDX7S/8ABOX9qS9/aD+G11pPiOcT+LfDflw3E/AN1AwIjmPq3ylWPcjP8VfinX1//wAEr/GUnhv9qrTtLWTbBrmnXVo69iyRmZT/AOQz+dAj9rKKap9806gkKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigArmNLjFx4a1KJiqq91fqTJ93BuJRz7V09c/wCG1Eml3SMAym+vQQen/HzLR1IkubQ8Xkm10+EX8OL498HLY+R9lD5YyiLGAufM67eM4r5k/wCCqFrrVr8A/BketXGn3LrrhELaejqnli3OM7iSTnuK+1viV4I8Nw+BddnGjWFtJDayTJMtsisrquVIOPUCvjz/AIK1SNN+z/8AD6Rhhm1UMeMcm3arex5uGpunWfM+ndv8z8pKKKKg9g0tV8N3uj6Zo+oXMe201aB7i2kHRlSV4mH1DIf++qza+u/HHwrGv/8ABOT4beObWLdd6DrV9a3TDr9nmuZMH8JFT/vqvkSgD6r/AOCaPxQ/4Vz+1Fo9nNL5dl4khfSJATwzthovx3qo/wCBV+34+6K/mn8L69deFfEula1YyGO9067ivIWU4IeNw6n8xX9GPw58a2/xC8A+HvEtmytbarYQ3qEejoG/rQSeF/8ABRj4mf8ACuP2VvFQhl8q+1tV0iDHX96f3n/kMP8AnX4YV+jn/BYb4mG98SeB/AkEp8uxhl1W6Qd3kISLP0VZP++q/OOgEFaviLwve+Fbizt79PLmurOG9Re4jlQOhP1Ug/jWz8IvAVz8Ufih4X8J2qkzavqEVp8vZWYbz7YXcfwr2X/gobpFt4f/AGpfEOmWcaxWllaWNvDGowFRLZFUD8AKCj5srpPhr/yUbwr/ANhW1/8ARq1zddJ8Nf8Ako3hX/sK2v8A6NWgTP6RV/1Y+lfiB/wU41x9Z/a+8TxMxMen2lnaR57DyFcj/vp2r9v1/wBWPpX4Tf8ABRX/AJPF+IH/AF1tv/SaKgSPm+jG7jGc9qKsadGJNQtUPRpVH6igo/eb9iL4M6Z8Gf2ffC1la2kcWq6jZx6hqV0FG+eaUb/mPcKGCj6V77WP4Tt1tPDekwoNqR2cKKPQBBxWjd3cVlBJNPIkMMal3kkbaqKBkkk9APWggmbla+W/+Cg37PE3x4+B1zFomijVPGemzRTaX5e0SkF1WVATjgoScH+6K+gP+FleEv8AoaNF/wDBhF/8VTW+JHhJv+Zp0Yf9xCL/AOKoA/ED/h3/APH3v8O7/PX/AF0X/wAXR/w7/wDj7/0Tu/8A+/sX/wAXX7gD4keER/zNGjf+DCL/AOKo/wCFkeEv+ho0X/wYRf8AxVBR8bf8EwvgT8QPgbZePLXxx4euNBTUZbSS1Wd0bzCgkDEbSem4V55/wWWkb7D8NI8EJ5l4344jr9G9L8SaR4gMn9mapZal5ePM+yXCS7M9M7ScV8E/8Fh/Cst98K/A/iBELR6fqr2srdx5sRKk+37s/iRQJH5Q0UUUFH7r/wDBPHS9M0n9kj4fnTkjX7VbzXFw6Dl5mnk3lj6gjH4V9J5r8If2cf28PiR+zXop0LRjp+s+HTI0q6dqkTMImY5YxurArk5ODkZJOK+jtN/4LLeII8C++G+nSnu0GoOpP4FTQTY/U+TBRgRkY5r8Zv2lP2CfirqXx38bX3gvwPc33hi81GS6sZoJIwhSQ7yACwOAzMK9y03/AILMaYygaj8NbtM8H7LqKk/+PIK7bQ/+CvvwquyBqXhvxRprdCUigmUflID+lAHwb/w7/wDj7/0Tu/8A+/0X/wAXXtv7Fv7HXxh+GP7TXgjxJ4j8F3ml6JYzTtc3ckkZWMNbyoMgMTyWA/Gvub4e/wDBQf4H/Ei+is7Lxeul3cpCpDrEDWmSe25ht/Wvoi2ukvIY5InWSKQBldGBVgRwQR1oGTx96fTVXbTqCQooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACua0Ux/2DqHnNsi+1329s4wPtEuTmulrlLS3e68I6xDGN0kk+oIo9SZ5gKOpnO9tDxg6XojWa6vP4J8QXPhrIlN3PqrSK0QORIYGlyV74PavCv8Agr40cnwP8DtFgxHWSVx0x5DV9KP8TPDZ+EK6ENUhOtDShp/9m8+f54i2FNnXO6vmP/grVC1v+z/8PonGJI9VCsPcW7ZrR6nBhEozai76f0j8o6KKKzPVP18/Y0+HMHxb/wCCcD+EZwv/ABNI9UhjZhnbL58hjb8G2mvyK1Cxn0vULmyuo2hubeRopY26o6nBH4EEV+2X/BMH/kzvwv8A9fl//wClL1+bf/BQz4VH4W/tReJ1hh8rTdaKataY6YlUeYB9JA/6UAfNVfst/wAErvih/wAJr+zanh6ebfd+FrySz+Y8iGQmWM/mzj6KK/Gmvpf9ib9pIfs+3XxINxP5cOq+G7kWyN0a+iVjb/mWYfj7UAcp+2h8Sf8Ahan7THjvWo5PMso79rG09PJh/dL+e0n8a8TNPmuJLqeSaVzJJIxZ2bqWJJJNMoGfdH/BJX4UnxV8btX8Y3EZa18MWZWJmHHnzhkX8dgkP4ivNv8AgpMMfteeL/8Arna/+iEr9EP+CY3wp/4Vz+zLpmpzQ+VfeJ5n1aTI58s/LD/44oYf79fnh/wUo/5O+8Yf9c7X/wBEJQI+X66T4a/8lG8K/wDYVtf/AEatc3XSfDX/AJKN4V/7Ctr/AOjVoBn9Iq/6sfSvwn/4KLf8nifED/rrb/8ApNFX7sL/AKsfSvwn/wCCi3/J4nxA/wCutv8A+k0VAkfN1WtK/wCQpZ/9dk/9CFVataWduqWZPTzk/wDQhQUf0oeH+NF0/wD69o//AEEVwv7TCg/s6/E/I/5lnUv/AElkrufDriTRNOK8g20ZB/4CK5H9oDSbzxB8DfiDpWnW0l5qN9oF/bW1vEMvLI9u6qij1JIFBB/OnS17R/wxf8ccf8kw8Rf+Ap/xrH8X/sw/FbwD4du9e8ReA9a0fRrMKZ726t9scYLBRk57kgfjQUjy+iiigGfpt/wRnAKfE7I72X8pa+4v2kPg1a/H74PeIfBd24he9hD21ww4iuEO6NvoGAz7E18O/wDBGc4j+Jx97L+UtfpmRuXFBJ/Np478Ca58M/FWoeHPEdhLpmr2LmOe3mXGD6g91PUEcGsGv6GvjL+zb8P/AI+aelt418PW+pyxLtgvUJiuYf8AdlX5h9OntXxz44/4I4+GbyWSXwj441DSwTlbfVIEuVX23rtP50DuflXmk4P0r7113/gj38TrRmOleLPDOoKPu/aHngJ/ARtXJXX/AASh+OdqxEcfhu69TDqhA/8AHkFA7nxx+lFfVOr/APBMn4/6TC0q+FrO/CjJWz1SBm/IsCfwr5v8YeDdb+H/AIjvNB8RaZcaRrFm2ye0uk2uh/w9xwe1AzFxX3t/wTT/AGv9X8H+PdM+F3iXUZLvwxrD+Rpr3DFjY3BHyIpJ4RyAuOgJBGMmvgqtLw3rU/hvxFpmrWzFLixuY7mNgcEMjBh/KgR/SrE24dc1JWX4Z1IaxoOnX6nK3VtFOD7Mgb+talBIUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABXLabeNYeGNVuUXe0FzfyBfUi4lOK6muBuvFmleGfD8iapctD9t1G9t4UijMkjsbmUfKoBJwOelC3RlUdlvYT4Z6Td3OiW2tavfLqN7qMMd0P9HjjWDcuSqbRnHzYySTxXx7/wWGXb8F/BY6/8Ttv/AEQ1e8z/ANgeC9V/4R5/iH4usDa+WuAim3hDjKKZPs5VRjHU8V4D/wAFfOPgf4HAkaXGskeY3Jb9w3NXI5MHUi1yJbH5NUUUVB6R+3H/AATB/wCTO/C//X5qH/pS9eR/8Fe/hSdY+Hnhbx9aw7ptHuzp92yj/lhMMqx9g6gf8Dr13/gl/wD8meeFv+vy/wD/AEpevaf2jPhlD8X/AII+MPCUiKZNR0+RbckfdnUboj/32q0En87incKXp0OKkuLWWxuJredDHNDI0bowwVYEgj8wajoKECheldN8MvBN38SPiJ4c8LWSF7nV7+GzQD/bcAn8ASa5qvtn/gk/8Kz4y+P954qnh32XhazMwcjgXEwaOMfXaJT+AoBn68+FtBtfCnhvS9FsUWKy060itIUUYCoiBVA/ACvxN/4KUf8AJ33jD/rna/8AohK/clgAOBivw2/4KUf8nfeMP+udr/6ISgSPl+uk+Gv/ACUbwr/2FbX/ANGrXN10nw1/5KN4V/7Ctr/6NWgbP6RV/wBWPpX4Yf8ABSOxex/bG8c7wQJRaSr7hrWI5+nWv3PX/Vj6V+QX/BXTwDJofx10LxSkRFrrekpE0mOs0DMrf+ONH+VAkfCdOjkMUiuvDKcim5ooKP6I/wBnTx1a/En4I+CvEVnKJYrzSoNxB5WRVCOp9wysPwr0Vow3qPpX4P8A7Mv7cfj/APZjt5NL0r7NrnhmaUytpGoBtkbE/M0bggoT34IJ7V9gaP8A8FktFa3X+1Ph3fxT4+b7Jfo6k+25QaCD9IDGMV8i/wDBUXxdb+Gv2UdZ09pQlzrV5a2cKZ5bbKsrY/CP9a8X17/gslo62b/2P8O7+S6x8v2y/RUB99qmvh/9pX9q3xp+1B4gtr7xM8Fpp9juFjpVkGWGANjJ5JLMQBlj6dulAzxhfugegxS0DoKPoMmgZ+on/BGvTWXQviXfFT5bXNnCG9wkhP8AMfnXuX7d37YXiX9lO38JzaDomm6uusPOkv8AaHmDZsCkbdhHXdXLf8ElPBcvh/8AZrv9YnQq+u63NcRt6xRxxxL/AOPLIfxrB/4K+eDpdT+CnhfxBFGWGk6x5Ux/upNGwz/30ij8aBHh3/D4z4jf9CT4a/76n/8Ai6P+HxnxG/6Enw1/31P/APF18AcUGgZ/SR8PPFQ8deBfD3iABFGqWEF4RF90F41YgH0BJH4V0W0V+MX7Mv8AwUw8WfAfwZYeENX0G38VaDp6lLN2maG6gjJzs3fMrKMnGQCOmcCvomD/AILIeFTEpm+H2sLJ3C3sRH8qCT9EmjG09xX4/wD/AAV1sbK1/aA8Py24VbmbQozcbRySJZApPvj9AK9a8Qf8FktN+yuui/Du7e4IO031+qoD77FJr8/fjn8bPEP7QHxG1Dxh4kaNb26Ajjt4ARFbxL9yNM84GT16k0FI4CiirGm6fNq2oW1jbIZLi5lWGNR3ZjgD86AP6K/gdI0vwY8BuxyzaBYEn/t3jruKwvAuir4b8GaFpKDC2Nhb2oH+5Gq/0rdoJCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAK8kjAk+J3hcMAwQ624z2P2nGfrgkfjXrdeYeIvCfiG31HS9a0JbKfU9Pub7NneSFI5oZ5i+A4B2sPlPQ9xTW5yYhPlTSvZr8GmZnjPw5c2mifFO9u4FFpfWavbtuB3bICp47YPrXyf8A8FZM/wDDPXw6JJOdSQkn/r2NfWXiCH4keMNHutFuND0XSLa+QwT3i6g8zIjcNtTYMnHTmvIP+CgX7N/jL4/fCrwp4e8EWtteXemX/nyC6uVgHliIoCC3U5qpPQxw0V7RuMWlbrp1ufinRX1v/wAOs/j/AP8AQD0n/wAG8P8AjR/w61+Pw66HpP8A4N4f8ag9K5+gX/BL/wD5M88Lf9fl/wD+lL19XyfdArwL9h/4R+JPgd+zvofhDxXBDa61Z3N1JLHbzLMgEkzOuGHB4Ir39l3daBH4N/t9fC3/AIVN+1B4tsoYfK03U5F1az9NkwDMB9JN4/AV881+xn/BRr9j3xP+0XJ4R1nwNaWlzr2neba3SXVwsAaBsMh3N1w4PH+1XxV/w6z+P/8A0BNJ/wDBtD/jQO58jtX7Rf8ABLf4V/8ACA/s2wa7PF5d94pumv3JHPkrlIvwwGI/36+G7H/glj8dpNQtVvNI0mG1aRRLINViYquRkgA84Ga/ZHwR4WtPBXg7Q/D9igjs9LsobKFVGBtjQKP5UAbbfdr8Nv8AgpR/yd94w/652v8A6ISv3Ikzt4r8vf2zv2DPi78bP2hPEXi7wtpen3Oi3qQCGSfUY4nO2NVOVY5HIoA/Nmuk+Gv/ACUbwr/2FbX/ANGrX0n/AMOs/j//ANATSf8Awbw/41seDf8AgmT8d9D8YaFqN1o2lJbWl9BPKy6rCxCrIrEgA88A8UBc/ZpPuD6V89ftufs0/wDDSnwZuNIsyieJNNk+3aVI+AGlCkGIk9FdTj6hT2r6Eiz5a560rKGGDQI/mm8ReG9U8H65faPrNjPp2p2chiuLW4Ta8bDqCP8AOetZ9f0A/Hz9kf4aftEW+7xXouNTRNser2DCG7QYwBvwdwHowIr4b+In/BHfWLaaWXwR44tryDPyW2twNE49i8YYH/vkUDufnFRX1dr/APwTB+P2iyOIPDmn6wi9HsNUhwfwkZT+lclc/sCfH61lKN8N9Sc/9MpInH5hzQO58/UV79F+wT8fJZFQfDbVAT/eaID8y9dJov8AwTQ/aC1h1D+D4dNU/wDLS91O2UD8Fdm/SgLny7XS/DX4d638WPGukeFvD9nJeapqUwhiRRwo/icnsqjJJPYV9zfD3/gj34tvpopPGnjPTdJts/vIdJje5lx6BmCqPyNfef7PH7JPw8/ZtsXj8K6a82pzIFuNYvyJLqXHbcAAq/7KgD60Cudz8G/hxY/CP4YeG/CGnfNbaTZx2/mYAMjgfO5x3ZiT+NZv7QPwjtfjh8H/ABN4MunWP+07Vlhlb/lnMuGib8HVTXoiRiMEClYbhg9KBH81Xi7wnqvgXxNqXh/WrOSx1XTpmt7m3kHKOpIP4entWVX7y/tK/sQ/Dn9pbF/rNtNpHiRE2R61ppVZiB0WQEEOo9+fQivhDx1/wSE+Iul3Er+FPE2i6/bZJWO932k2PToy5/EUDufBNFfTWsf8E3f2g9JkK/8ACDi9Ufx2mo2zg/h5mf0rBP7Bnx8ViD8NdWJHoYyP/QqB3PA6K+hLL/gn/wDH++banw51CM5x++mgjH/j0grtvDf/AASz+POuSILzS9J0GNur6hqSMR+EW+gLnyIWxX17/wAE3v2Z774wfGbT/FV/aMPCfhmcXU8zrhbi5UZiiHr8wDN7D3r6K+Ev/BH7StPvILz4ieLZtVCEM2m6KnkxvjnDSOCxH0APvX6CeBfAHh/4a+GbHw/4a0u30fSLNNkVrbLtUepPqT3J5NArm+qletOoooEFFFFABRRRQAUUUUAFFFIxwKAForyTxt+0Vo/hHWJdNhtZtSnhbZM0bBUVu6gnqa6zwD8StL+IWnG506Rklj4mt5cB4z746j3FAHX0UUUAFFFFABRRUF9eRafaS3M7iOGJSzMewFAE9Febn41aeLzYLSc22cedx09dvX8K73T9Qg1O0jubeUSwyDcrD0oAt0UUUAFFFFABRRVS+1COxjDyEjJwABnNAFuism18QQ3EgRlMWehbpWrSAWiiimAUUUUAFFFVLjUFgbGCx74oAt0VXt7xLjgcN6VYoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKjMZYnPIqSigCKOPax4xTwPanUUxJW2CiiikMKKKKACiiigAooooAKKKKACiiigAooooASilooASloooASloooASloooAKKKKACiiigBKKWigBKWiigBKWiigAooooAKKKKACiiigAoqKa4WFWZyERRksxwBj1rCb4heGkYq2u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FABWTrmpNaxrHHw7jr6CtasrWtLe+RGjwJE7eooA5nknJOTV7TdNa+ky3EI6n19qms/D9w8v79PLj6n5gSfyNdHDCkMaoihVXpSRQkEKwqEQYUDgVLSUtMkKKKKAErKvrhmk2A/KK1azbrT5GkLoN2eccUhopfhV6zszxI4+gp1rp5Vt8owewq+KLDuAFLRRTJCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//Z';
+  
+  function afficherApercu() {
+    const factureNum = document.getElementById('factureNum').value || "001/2024";
+    const reference = document.getElementById('reference').value || "Référence...";
+    const client = document.getElementById('client').value || "Sahel Port Tanit Lot N° 59";
+    const compteur = document.getElementById('compteur').value || "4064";
+    const ancienIndex = parseFloat(document.getElementById('ancienIndex').value) || 0;
+    const nouvelIndex = parseFloat(document.getElementById('nouvelIndex').value) || 0;
+    const prixUnitaire = parseFloat(document.getElementById('prixUnitaire').value) || 0;
+  
+// DÉPLACER CE BLOCE AVANT SON UTILISATION
+const dateDebut = document.getElementById('dateDebut').value || "";
+    const dateFin = document.getElementById('dateFin').value || "";
+    const mois = new Date(dateDebut).toLocaleString('fr-FR', { month: 'long' });
+    const referenceComplete = `${reference} - Relevé du mois ${mois} du ${dateDebut} au ${dateFin}`;
+   
+
+document.getElementById('afReference').textContent = "Référence: " + referenceComplete;
+
+    const conso = nouvelIndex - ancienIndex;
+    const montantBrut = conso * prixUnitaire;
+    const taxes = 0;
+    const montantTTC = montantBrut + taxes;
+  
+    document.getElementById('apercuFacture').style.display = 'block';
+    document.getElementById('afFacture').textContent = "Facture: " + factureNum;
+
+
+
+    
+
+    document.getElementById('afClient').textContent = "Nom et adresse du Client: " + client;
+  
+    document.getElementById('afCompteur').textContent = compteur;
+    document.getElementById('afAncien').textContent = ancienIndex.toFixed(2);
+    document.getElementById('afNouveau').textContent = nouvelIndex.toFixed(2);
+    document.getElementById('afConso').textContent = conso.toFixed(2);
+  
+    document.getElementById('afConso2').textContent = conso.toFixed(2);
+    document.getElementById('afPrixUnitaire').textContent = prixUnitaire.toFixed(2);
+    document.getElementById('afMontantBrut').textContent = montantBrut.toFixed(2);
+    document.getElementById('afTaxes').textContent = taxes.toFixed(2);
+    document.getElementById('afMontantTTC').textContent = montantTTC.toFixed(2);
+  
+    document.getElementById('afTotalFacture').textContent = montantBrut.toFixed(2);
+    document.getElementById('afTotalPayer').textContent = montantTTC.toFixed(2);
+  }
+  
+  function genererPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p','pt','a4');
+  
+    const margeGauche = 60;
+    let currentY = 180;
+  
+    // Champs
+    const factureNum = document.getElementById('factureNum').value || "001/2024";
+    const reference = document.getElementById('reference').value || "Référence...";
+    const client = document.getElementById('client').value || "Sahel Port Tanit Lot N° 59";
+    const compteur = document.getElementById('compteur').value || "4064";
+    const ancienIndex = parseFloat(document.getElementById('ancienIndex').value) || 0;
+    const nouvelIndex = parseFloat(document.getElementById('nouvelIndex').value) || 0;
+    const prixUnitaire = parseFloat(document.getElementById('prixUnitaire').value) || 0;
+  
+
+    const dateDebut = document.getElementById('dateDebut').value || "";
+const dateFin = document.getElementById('dateFin').value || "";
+const mois = new Date(dateDebut).toLocaleString('fr-FR', { month: 'long' });
+const referenceComplete = `${reference} - Relevé du mois ${mois} du ${dateDebut} au ${dateFin}`;
+
+
+    const conso = nouvelIndex - ancienIndex;
+    const montantBrut = conso * prixUnitaire;
+    const taxes = 0;
+    const montantTTC = montantBrut + taxes;
+  
+    doc.setFontSize(10);
+  
+    // Logo à gauche
+   const logoWidth = 250; // Largeur du logo (comme dans l'aperçu HTML)
+const logoHeight = 125 // Hauteur du logo
+const pageWidth = doc.internal.pageSize.getWidth();
+
+const logoX = margeGauche; // Utiliser la marge gauche définie plus haut (60)
+
+
+doc.addImage(logoBase64, 'PNG', logoX, 40, logoWidth, logoHeight); // Position Y à 40px du haut
+  
+    // Infos
+    doc.text("Facture : " + factureNum, margeGauche, currentY); 
+    currentY += 15;
+
+    
+    const moisPDF = new Date(dateDebut).toLocaleString('fr-FR', { month: 'long' });
+const referenceCompletePDF = `${reference} - Relevé du mois ${moisPDF} du ${dateDebut} au ${dateFin}`;
+doc.text("Référence : " + referenceCompletePDF, margeGauche, currentY);
+
+    currentY += 15;
+
+    
+    doc.text("Nom et adresse du Client : " + client, margeGauche, currentY);
+    currentY += 25;
+  
+    // Un seul tableau => 6 colonnes
+    // 1) Consommation
+    // 2) N° Compteur
+    // 3) Ancien Index
+    // 4) Nouvel Index
+    // 5) & 6) Consommation
+    // Puis Facturation Consommation ...
+    // Puis Totaux en bas à droite, SANS lignes avant.
+  
+    const headRows = [
+      [
+        "Consommation",
+        "N° Compteur",
+        "Ancien Index",
+        "Nouvel Index",
+        { content: "Consommation", colSpan: 2, styles: { halign: 'center' } }
+      ],
+      [
+        "Consommation De l'eau Relevé",
+        compteur,
+        ancienIndex.toFixed(2),
+        nouvelIndex.toFixed(2),
+        { content: conso.toFixed(2), colSpan: 2, styles: { halign: 'center' } }
+      ],
+      [
+        "Facturation Consommation",
+        "Consommation",
+        "Prix Unitaire",
+        "Montants Bruts",
+        "Montants de taxes",
+        "Montants TTC"
+      ]
+    ];
+  
+    const bodyRows = [
+      [
+        "Consommation De l'eau",
+        conso.toFixed(2),
+        prixUnitaire.toFixed(2),
+        montantBrut.toFixed(2),
+        taxes.toFixed(2),
+        montantTTC.toFixed(2)
+      ],
+      // Totaux en bas à droite (sans ligne supplémentaire)
+      [
+        { content: "", colSpan: 4 },
+        "Total Facture",
+        montantBrut.toFixed(2)
+      ],
+      [
+        { content: "", colSpan: 4 },
+        "ARIERES",
+        "0"
+      ],
+      [
+        { content: "", colSpan: 4 },
+        "TOTAL A PAYER",
+        montantTTC.toFixed(2)
+      ]
+    ];
+  
+    doc.autoTable({
+      startY: currentY,
+      theme: 'plain',
+      head: headRows,
+      body: bodyRows,
+      styles: {
+        lineWidth: 0.5,
+        lineColor: [0, 0, 0]
+      },
+      margin: { left: margeGauche, right: margeGauche },
+      tableWidth: 'auto'
+    });
+  
+   // Place ces lignes après avoir créé ton doc jsPDF (doc = new jsPDF(...))
+  const centerX = doc.internal.pageSize.getWidth() / 2; 
+  // Position verticale à 300 points depuis le haut
+  let posY = 750;
+  
+  // Affiche le texte centré
+  doc.text("Adresse: Ksar N°: 1631 - B.P.: 1234 Nouakchott, Mauritanie", centerX, posY, { align: 'center' });
+  posY += 15;
+  doc.text("Tel/Fax: +222 45 29 86 16 - NIF: 28001735", centerX, posY, { align: 'center' });
+  posY += 15;
+
+
+
+doc.setTextColor(40, 167, 69); // Vert en RGB (#28a745)
+doc.text("E-mail: msovid@yahoo.fr - www.lesproducticeloo.mr", centerX, posY, { align: 'center' });
+doc.setTextColor(0, 0, 0); // Remettre en noir
+  
+    // Téléchargement
+    doc.save("Facture.pdf");
+  }
+  </script>
+  
+  
+  
+  </body></html>
